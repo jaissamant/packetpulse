@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PacketPulse 🌐</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 600;
+      color: #58a6ff;
+      letter-spacing: -0.3px;
+    }
+
+    .logo span { color: #e6edf3; }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: #1f2937;
+      border: 1px solid #30363d;
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: #8b949e;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #3fb950;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── Stat Cards ── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 16px 24px;
+      background: #0d1117;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .stat-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #e6edf3;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value.blue  { color: #58a6ff; }
+    .stat-value.green { color: #3fb950; }
+    .stat-value.amber { color: #d29922; }
+    .stat-value.pink  { color: #f778ba; }
+
+    /* ── Filter Bar ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: #0d1117;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      color: #8b949e;
+      margin-right: 4px;
+    }
+
+    .filter-btn {
+      padding: 4px 12px;
+      border-radius: 99px;
+      border: 1px solid #30363d;
+      background: transparent;
+      color: #8b949e;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+    .filter-btn.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+
+    .packet-count {
+      margin-left: auto;
+      font-size: 12px;
+      color: #8b949e;
+    }
+
+    /* ── Table ── */
+    .table-wrap {
+      overflow-y: auto;
+      height: calc(100vh - 200px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background: #161b22;
+      z-index: 10;
+    }
+
+    th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 500;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #30363d;
+    }
+
+    td {
+      padding: 8px 16px;
+      border-bottom: 1px solid #161b22;
+      font-size: 12px;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      color: #c9d1d9;
+      white-space: nowrap;
+    }
+
+    tr:hover td { background: #161b22; }
+
+    /* Protocol badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-TCP  { background: #1f3a5f; color: #58a6ff; border: 1px solid #1f6feb; }
+    .badge-UDP  { background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-ICMP { background: #3a2a1a; color: #d29922; border: 1px solid #9e6a03; }
+    .badge-DNS  { background: #2d1f3d; color: #bc8cff; border: 1px solid #8957e5; }
+    .badge-HTTPS{ background: #1a3a2a; color: #3fb950; border: 1px solid #2ea043; }
+    .badge-default { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+
+    .arrow { color: #30363d; }
+    .ip-src { color: #79c0ff; }
+    .ip-dst { color: #ffa657; }
+    .service-name { color: #8b949e; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #8b949e;
+    }
+
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* Connection status */
+    .conn-lost {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #da3633;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Packet<span>Pulse</span> 🌐</div>
+  <div class="status-pill">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Connecting...</span>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="stat-label">Total Packets</div>
+    <div class="stat-value blue" id="stat-total">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Bytes</div>
+    <div class="stat-value green" id="stat-bytes">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Packets / sec</div>
+    <div class="stat-value amber" id="stat-pps">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Top Protocol</div>
+    <div class="stat-value pink" id="stat-proto">—</div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" onclick="setFilter('ALL')">ALL</button>
+  <button class="filter-btn" onclick="setFilter('TCP')">TCP</button>
+  <button class="filter-btn" onclick="setFilter('UDP')">UDP</button>
+  <button class="filter-btn" onclick="setFilter('ICMP')">ICMP</button>
+  <span class="packet-count" id="packet-count">0 packets</span>
+</div>
+
+<div class="table-wrap" id="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Protocol</th>
+        <th>Source</th>
+        <th></th>
+        <th>Destination</th>
+        <th>Size</th>
+        <th>Service</th>
+      </tr>
+    </thead>
+    <tbody id="packet-table">
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">
+            <div class="icon">📡</div>
+            <p>Waiting for packets...</p>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="conn-lost" id="conn-lost">⚠ Connection lost — reconnecting...</div>
+
+<script>
+  // ── State ──
+  let allPackets = [];
+  let activeFilter = 'ALL';
+  let autoScroll = true;
+  const MAX_ROWS = 200;
+
+  // ── Socket ──
+  const socket = io();
+
+  socket.on('connect', () => {
+    document.getElementById('status-text').textContent = 'Live';
+    document.getElementById('status-dot').style.background = '#3fb950';
+    document.getElementById('conn-lost').style.display = 'none';
+  });
+
+  socket.on('disconnect', () => {
+    document.getElementById('status-text').textContent = 'Disconnected';
+    document.getElementById('status-dot').style.background = '#da3633';
+    document.getElementById('conn-lost').style.display = 'block';
+  });
+
+  // Receive full history on connect
+  socket.on('packet_history', (packets) => {
+    allPackets = packets.slice(-MAX_ROWS);
+    renderTable();
+  });
+
+  // Receive each new packet
+  socket.on('new_packet', (packet) => {
+    allPackets.push(packet);
+    if (allPackets.length > MAX_ROWS) allPackets.shift();
+    appendRow(packet);
+    updateCount();
+  });
+
+  // Receive stats updates
+  socket.on('stats_update', (stats) => {
+    document.getElementById('stat-total').textContent =
+      stats.total_packets.toLocaleString();
+    document.getElementById('stat-bytes').textContent =
+      formatBytes(stats.total_bytes);
+    document.getElementById('stat-pps').textContent =
+      stats.packets_per_sec.toFixed(1);
+
+    // Top protocol
+    const proto = stats.by_protocol || {};
+    const top = Object.entries(proto).sort((a,b) => b[1]-a[1])[0];
+    document.getElementById('stat-proto').textContent = top ? top[0] : '—';
+  });
+
+  // ── Filter ──
+  function setFilter(f) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent === f);
+    });
+    renderTable();
+  }
+
+  // ── Render full table ──
+  function renderTable() {
+    const tbody = document.getElementById('packet-table');
+    const filtered = activeFilter === 'ALL'
+      ? allPackets
+      : allPackets.filter(p => p.protocol === activeFilter);
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7">
+        <div class="empty-state">
+          <div class="icon">📡</div>
+          <p>Waiting for packets...</p>
+        </div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(p => rowHTML(p)).join('');
+    updateCount();
+    scrollBottom();
+  }
+
+  // ── Append single row (faster than full re-render) ──
+  function appendRow(packet) {
+    if (activeFilter !== 'ALL' && packet.protocol !== activeFilter) return;
+
+    const tbody = document.getElementById('packet-table');
+
+    // Clear empty state if present
+    if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = rowHTML(packet);
+    tbody.appendChild(tr);
+
+    // Trim old rows
+    while (tbody.rows.length > MAX_ROWS) tbody.deleteRow(0);
+
+    if (autoScroll) scrollBottom();
+  }
+
+  // ── Row HTML ──
+  function rowHTML(p) {
+    const time = p.timestamp ? p.timestamp.substring(11, 19) : '—';
+    const src  = p.src_port  ? `${p.src_ip}:${p.src_port}` : p.src_ip;
+    const dst  = p.dst_port  ? `${p.dst_ip}:${p.dst_port}` : p.dst_ip;
+    const badge = badgeHTML(p.protocol);
+    const svc  = p.service !== 'Unknown' ? p.service : '';
+
+    return `<tr>
+      <td>${time}</td>
+      <td>${badge}</td>
+      <td class="ip-src">${src}</td>
+      <td class="arrow">→</td>
+      <td class="ip-dst">${dst}</td>
+      <td>${p.size}B</td>
+      <td class="service-name">${svc}</td>
+    </tr>`;
+  }
+
+  // ── Badge ──
+  function badgeHTML(proto) {
+    const cls = ['TCP','UDP','ICMP'].includes(proto)
+      ? `badge-${proto}`
+      : proto === 'HTTPS' ? 'badge-HTTPS'
+      : 'badge-default';
+    return `<span class="badge ${cls}">${proto}</span>`;
+  }
+
+  // ── Helpers ──
+  function formatBytes(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    return (b/1048576).toFixed(1) + ' MB';
+  }
+
+  function scrollBottom() {
+    const wrap = document.getElementById('table-wrap');
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  function updateCount() {
+    const filtered = activeFilter === 'ALL'
+      ? allPackets.length
+      : allPackets.filter(p => p.protocol === activeFilter).length;
+    document.getElementById('packet-count').textContent =
+      `${filtered.toLocaleString()} packets`;
+  }
+
+  // Pause auto-scroll when user scrolls up
+  document.getElementById('table-wrap').addEventListener('scroll', function() {
+    const el = this;
+    autoScroll = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+  });
+</script>
+
+</body>
+</html>
