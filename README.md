@@ -5,8 +5,8 @@
 ## 🚀 Progress log
 
 - [x] Day 1 — Packet capture engine
-- [ ] Day 2 — Flask server + WebSocket streaming
-- [ ] Day 3 — Dashboard UI
+- [x] Day 2 — Flask server + WebSocket streaming
+- [x] Day 3 — Dashboard UI
 - [ ] Day 4 — Charts & analytics
 - [ ] Day 5 — Packet inspector & geo IP
 - [ ] Day 6 — Alert system & export
