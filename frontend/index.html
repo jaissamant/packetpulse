@@ -1,112 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PacketPulse 🌐</title>
-  <link rel="stylesheet" href="/css/main.css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+  <title>PacketPulse — Network Traffic Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <link rel="stylesheet" href="/css/main.css" />
 </head>
 <body>
 
-<!-- ── Header ── -->
-<header class="header">
-  <div>
-    <span class="logo-text">Packet<span>Pulse</span> 🌐</span>
-    <span class="logo-badge">LIVE</span>
-  </div>
-  <div class="header-right">
-    <div class="status-pill">
-      <div class="status-dot live" id="status-dot"></div>
-      <span id="status-text">Connecting...</span>
+  <header class="site-header">
+    <div class="header-brand">
+      <span class="brand-icon">⬡</span>
+      <span class="brand-name">PacketPulse</span>
+      <span class="brand-day">Day 4</span>
     </div>
-    <button class="btn" id="btn-pause">⏸ Pause</button>
-    <button class="btn danger" id="btn-clear">✕ Clear</button>
-  </div>
-</header>
+    <div class="header-status">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-text" id="statusText">Connecting…</span>
+    </div>
+  </header>
 
-<!-- ── Stat Cards ── -->
-<div class="stats-row">
-  <div class="stat-card">
-    <div class="stat-label">Total Packets</div>
-    <div class="stat-value c-blue" id="stat-total">0</div>
-    <div class="stat-sub">captured</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Data Transferred</div>
-    <div class="stat-value c-green" id="stat-bytes">0 B</div>
-    <div class="stat-sub">total bytes</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Packets / sec</div>
-    <div class="stat-value c-amber" id="stat-pps">0.0</div>
-    <div class="stat-sub">live rate</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Top Protocol</div>
-    <div class="stat-value c-purple" id="stat-proto">—</div>
-    <div class="stat-sub">most traffic</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Protocols Seen</div>
-    <div class="stat-value c-red" id="stat-conns">0</div>
-    <div class="stat-sub">unique types</div>
-  </div>
-</div>
+  <section class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Packets</div>
+      <div class="stat-value" id="statPackets">0</div>
+      <div class="stat-sub" id="statPPS">0 pkt/s</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Bytes</div>
+      <div class="stat-value" id="statBytes">0 B</div>
+      <div class="stat-sub" id="statBPS">0 B/s</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Top Protocol</div>
+      <div class="stat-value" id="statTopProto">—</div>
+      <div class="stat-sub" id="statProtoCount">0 packets</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Active Hosts</div>
+      <div class="stat-value" id="statHosts">0</div>
+      <div class="stat-sub">unique IPs seen</div>
+    </div>
+  </section>
 
-<!-- ── Filter Bar ── -->
-<div class="filter-bar">
-  <span class="filter-label">Filter</span>
-  <button class="filter-btn active"  data-filter="ALL">ALL</button>
-  <button class="filter-btn f-tcp"   data-filter="TCP">TCP</button>
-  <button class="filter-btn f-udp"   data-filter="UDP">UDP</button>
-  <button class="filter-btn f-icmp"  data-filter="ICMP">ICMP</button>
-  <button class="filter-btn"         data-filter="DNS">DNS</button>
-  <button class="filter-btn"         data-filter="ARP">ARP</button>
-  <input  class="search-input" id="search-input" placeholder="🔍  Search IP, protocol..."/>
-  <span   class="packet-count" id="packet-count">0 packets</span>
-</div>
+  <main class="main-grid">
 
-<!-- ── Packet Table ── -->
-<div class="table-wrap" id="table-wrap">
-  <table>
-    <colgroup>
-      <col style="width:76px">
-      <col style="width:74px">
-      <col style="width:22%">
-      <col style="width:24px">
-      <col style="width:22%">
-      <col style="width:64px">
-      <col style="width:110px">
-      <col>
-    </colgroup>
-    <thead>
-      <tr>
-        <th>Time</th>
-        <th>Proto</th>
-        <th>Source</th>
-        <th></th>
-        <th>Destination</th>
-        <th>Size</th>
-        <th>Flags</th>
-        <th>Service</th>
-      </tr>
-    </thead>
-    <tbody id="packet-table"></tbody>
-  </table>
-</div>
+    <div class="charts-column">
+      <div class="chart-card chart-card--wide">
+        <div class="chart-card__header">
+          <span class="chart-card__title">Traffic Rate</span>
+          <span class="chart-card__sub">packets / second · last 30s</span>
+        </div>
+        <div class="chart-wrap chart-wrap--tall">
+          <canvas id="sparklineChart"></canvas>
+        </div>
+      </div>
 
-<!-- ── Pause Banner ── -->
-<div class="pause-banner" id="pause-banner">⏸ Paused — new packets buffered</div>
+      <div class="charts-row-2">
+        <div class="chart-card">
+          <div class="chart-card__header">
+            <span class="chart-card__title">Protocol Mix</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="protocolChart"></canvas>
+          </div>
+        </div>
 
-<!-- ── Toast Notifications ── -->
-<div class="toast-wrap" id="toast-wrap"></div>
+        <div class="chart-card chart-card--gauge">
+          <div class="chart-card__header">
+            <span class="chart-card__title">Data Transferred</span>
+          </div>
+          <div class="gauge-wrap">
+            <canvas id="bytesGauge"></canvas>
+            <div class="gauge-label-center">
+              <div class="gauge-value" id="bytesGaugeLabel">0 B</div>
+              <div class="gauge-sub">total bytes</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<!-- ── Scripts (order matters) ── -->
-<script src="/js/socket.js"></script>
-<script src="/js/stats.js"></script>
-<script src="/js/table.js"></script>
-<script src="/js/app.js"></script>
+      <div class="chart-card chart-card--wide">
+        <div class="chart-card__header">
+          <span class="chart-card__title">Top Source IPs</span>
+          <span class="chart-card__sub">most active talkers</span>
+        </div>
+        <div class="chart-wrap chart-wrap--hosts">
+          <canvas id="hostsChart"></canvas>
+        </div>
+      </div>
+    </div>
 
+    <div class="table-column">
+      <div class="table-card">
+        <div class="table-header">
+          <span class="chart-card__title">Live Packets</span>
+          <div class="table-controls">
+            <input type="text" id="searchInput" class="search-input" placeholder="Filter IP / protocol…" />
+            <div class="proto-filters" id="protoFilters">
+              <button class="proto-btn active" data-proto="ALL">ALL</button>
+              <button class="proto-btn" data-proto="TCP">TCP</button>
+              <button class="proto-btn" data-proto="UDP">UDP</button>
+              <button class="proto-btn" data-proto="ICMP">ICMP</button>
+              <button class="proto-btn" data-proto="ARP">ARP</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="packet-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Proto</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Size</th>
+                <th>Service</th>
+              </tr>
+            </thead>
+            <tbody id="packetTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/js/socket.js" defer></script>
+  <script src="/js/table.js" defer></script>
+  <script src="/js/stats.js" defer></script>
+  <script src="/js/charts.js" defer></script>
+  <script src="/js/app.js" defer></script>
 </body>
 </html>

@@ -10,19 +10,13 @@ const Table = (() => {
   let activeFilter = 'ALL';
   let searchTerm   = '';
   let autoScroll   = true;
-  let isPaused     = false;
 
-  const tbody      = document.getElementById('packet-table');
-  const countEl    = document.getElementById('packet-count');
-  const pauseBanner= document.getElementById('pause-banner');
-  const tableWrap  = document.getElementById('table-wrap');
+  const tbody    = document.getElementById('packetTableBody');
+  const tableWrap = document.querySelector('.table-scroll');
 
   // ── Filter ──
   function setFilter(f) {
     activeFilter = f;
-    document.querySelectorAll('.filter-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.filter === f);
-    });
     renderFull();
   }
 
@@ -32,33 +26,20 @@ const Table = (() => {
     renderFull();
   }
 
-  // ── Pause / Resume ──
-  function togglePause() {
-    isPaused = !isPaused;
-    pauseBanner.classList.toggle('show', isPaused);
-    document.getElementById('btn-pause').textContent =
-      isPaused ? '▶ Resume' : '⏸ Pause';
-  }
-
   // ── Add packet ──
   function addPacket(pkt) {
     allPackets.push(pkt);
     if (allPackets.length > MAX_ROWS) allPackets.shift();
 
-    if (isPaused) return;
     if (!matchesFilter(pkt)) return;
 
     clearEmpty();
     const tr = document.createElement('tr');
-    tr.className = 'new-row';
     tr.innerHTML = rowHTML(pkt);
-    tr.addEventListener('click', () => window.Inspector && Inspector.show(pkt));
     tbody.appendChild(tr);
 
-    // Trim
     while (tbody.rows.length > MAX_ROWS) tbody.deleteRow(0);
 
-    updateCount();
     if (autoScroll) scrollBottom();
   }
 
@@ -74,52 +55,38 @@ const Table = (() => {
 
     if (filtered.length === 0) {
       showEmpty();
-      updateCount();
       return;
     }
 
-    tbody.innerHTML = filtered.map(p => {
-      return `<tr class="new-row">${rowHTML(p)}</tr>`;
-    }).join('');
+    tbody.innerHTML = filtered.map(p =>
+      `<tr>${rowHTML(p)}</tr>`
+    ).join('');
 
-    // Attach click handlers
-    tbody.querySelectorAll('tr').forEach((tr, i) => {
-      tr.addEventListener('click', () =>
-        window.Inspector && Inspector.show(filtered[i])
-      );
-    });
-
-    updateCount();
     scrollBottom();
   }
 
   // ── Row HTML ──
   function rowHTML(p) {
-    const time  = p.timestamp ? p.timestamp.substring(11, 19) : '—';
-    const src   = p.src_port  ? `${p.src_ip}:${p.src_port}` : p.src_ip;
-    const dst   = p.dst_port  ? `${p.dst_ip}:${p.dst_port}` : p.dst_ip;
-    const flags = (p.flags || []).map(f =>
-      `<span class="flag-pill flag-${f}">${f}</span>`
-    ).join('');
-    const svc   = (p.service && p.service !== 'Unknown') ? p.service : '';
+    const time = p.timestamp ? p.timestamp.substring(11, 19) : '—';
+    const src  = p.src_port  ? `${p.src_ip}:${p.src_port}` : (p.src_ip || '—');
+    const dst  = p.dst_port  ? `${p.dst_ip}:${p.dst_port}` : (p.dst_ip || '—');
+    const svc  = (p.service && p.service !== 'Unknown') ? p.service : '';
 
     return `
       <td>${time}</td>
       <td>${badgeHTML(p.protocol)}</td>
-      <td class="td-src" title="${src}">${src}</td>
-      <td class="td-arrow">→</td>
-      <td class="td-dst" title="${dst}">${dst}</td>
-      <td class="td-size">${p.size}B</td>
-      <td>${flags}</td>
-      <td class="td-svc">${svc}</td>
+      <td title="${src}">${src}</td>
+      <td title="${dst}">${dst}</td>
+      <td class="size-cell">${p.size}B</td>
+      <td class="svc-cell">${svc}</td>
     `;
   }
 
-  // ── Badge ──
+  // ── Protocol badge ──
   function badgeHTML(proto) {
-    const cls = ['TCP','UDP','ICMP','DNS','ARP'].includes(proto)
-      ? `b-${proto}` : 'b-def';
-    return `<span class="badge ${cls}">${proto}</span>`;
+    const known = ['TCP','UDP','ICMP','ARP'];
+    const cls = known.includes(proto) ? proto : 'OTHER';
+    return `<span class="proto-badge ${cls}">${proto}</span>`;
   }
 
   // ── Filter match ──
@@ -134,35 +101,29 @@ const Table = (() => {
 
   // ── Helpers ──
   function showEmpty() {
-    tbody.innerHTML = `<tr><td colspan="8">
-      <div class="empty-state">
-        <div class="empty-icon">📡</div>
-        <div class="empty-title">Waiting for packets...</div>
-        <div class="empty-sub">Open a browser tab or browse the web</div>
-      </div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim)">
+      Waiting for packets…
+    </td></tr>`;
   }
 
   function clearEmpty() {
-    if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
+    const empty = tbody.querySelector('td[colspan]');
+    if (empty) tbody.innerHTML = '';
   }
 
   function scrollBottom() {
-    tableWrap.scrollTop = tableWrap.scrollHeight;
-  }
-
-  function updateCount() {
-    const n = allPackets.filter(matchesFilter).length;
-    countEl.textContent = `${n.toLocaleString()} packets`;
+    if (tableWrap) tableWrap.scrollTop = tableWrap.scrollHeight;
   }
 
   // Pause auto-scroll when user scrolls up
-  tableWrap.addEventListener('scroll', () => {
-    autoScroll = tableWrap.scrollHeight - tableWrap.scrollTop
-      - tableWrap.clientHeight < 60;
-  });
+  if (tableWrap) {
+    tableWrap.addEventListener('scroll', () => {
+      autoScroll = tableWrap.scrollHeight - tableWrap.scrollTop
+        - tableWrap.clientHeight < 60;
+    });
+  }
 
-  // Init empty state
   showEmpty();
 
-  return { setFilter, setSearch, addPacket, loadHistory, togglePause };
+  return { setFilter, setSearch, addPacket, loadHistory };
 })();
