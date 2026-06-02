@@ -102,6 +102,10 @@
         <div class="table-header">
           <span class="chart-card__title">Live Packets</span>
           <div class="table-controls">
+            <div class="action-buttons" style="display: flex; gap: 8px; margin-right: 10px;">
+              <button id="pauseBtn" class="proto-btn">Pause</button>
+              <button id="clearBtn" class="proto-btn">Clear</button>
+            </div>
             <input type="text" id="searchInput" class="search-input" placeholder="Filter IP / protocol…" />
             <div class="proto-filters" id="protoFilters">
               <button class="proto-btn active" data-proto="ALL">ALL</button>
