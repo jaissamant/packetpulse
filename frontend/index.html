@@ -6,19 +6,23 @@
   <title>PacketPulse — Network Traffic Visualizer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  
+
+  <!-- Day 4 styles -->
   <link rel="stylesheet" href="/css/main.css" />
+  <!-- Day 5 inspector styles -->
+  <link rel="stylesheet" href="/css/inspector.css" />
 </head>
 <body>
 
+  <!-- ── Header ── -->
   <header class="site-header">
     <div class="header-brand">
       <span class="brand-icon">⬡</span>
       <span class="brand-name">PacketPulse</span>
-      <span class="brand-day">Day 4</span>
+      <span class="brand-day">Day 5</span>
     </div>
     <div class="header-status">
       <span class="status-dot" id="statusDot"></span>
@@ -26,6 +30,7 @@
     </div>
   </header>
 
+  <!-- ── Stat Cards ── -->
   <section class="stats-row">
     <div class="stat-card">
       <div class="stat-label">Total Packets</div>
@@ -49,9 +54,12 @@
     </div>
   </section>
 
+  <!-- ── Main Grid ── -->
   <main class="main-grid">
 
+    <!-- Charts column (Day 4 — unchanged) -->
     <div class="charts-column">
+
       <div class="chart-card chart-card--wide">
         <div class="chart-card__header">
           <span class="chart-card__title">Traffic Rate</span>
@@ -95,17 +103,15 @@
           <canvas id="hostsChart"></canvas>
         </div>
       </div>
+
     </div>
 
+    <!-- Table column -->
     <div class="table-column">
       <div class="table-card">
         <div class="table-header">
           <span class="chart-card__title">Live Packets</span>
           <div class="table-controls">
-            <div class="action-buttons" style="display: flex; gap: 8px; margin-right: 10px;">
-              <button id="pauseBtn" class="proto-btn">Pause</button>
-              <button id="clearBtn" class="proto-btn">Clear</button>
-            </div>
             <input type="text" id="searchInput" class="search-input" placeholder="Filter IP / protocol…" />
             <div class="proto-filters" id="protoFilters">
               <button class="proto-btn active" data-proto="ALL">ALL</button>
@@ -116,6 +122,12 @@
             </div>
           </div>
         </div>
+
+        <!-- Day 5: click hint -->
+        <div class="inspector-hint">
+          👆 Click any row to inspect packet details &amp; geo location
+        </div>
+
         <div class="table-scroll">
           <table class="packet-table">
             <thead>
@@ -136,10 +148,29 @@
 
   </main>
 
+  <!-- ── Day 5: Inspector Panel ── -->
+  <div id="ins-overlay"></div>
+  <div id="inspector">
+    <div class="ins-header">
+      <div class="ins-title">📦 Packet Inspector</div>
+      <button class="ins-close" id="insClose">✕ Close</button>
+    </div>
+    <div class="ins-body" id="ins-body">
+      <div class="ins-placeholder">
+        <div class="ins-placeholder-icon">👆</div>
+        <div class="ins-placeholder-title">Click any packet row</div>
+        <div class="ins-placeholder-sub">to inspect its full details</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Scripts ── -->
   <script src="/js/socket.js" defer></script>
   <script src="/js/table.js" defer></script>
   <script src="/js/stats.js" defer></script>
   <script src="/js/charts.js" defer></script>
   <script src="/js/app.js" defer></script>
+  <script src="/js/inspector.js" defer></script>
+
 </body>
 </html>
