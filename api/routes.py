@@ -1,15 +1,18 @@
 """
-api/routes.py  (Day 5 update)
-------------------------------
-REST API endpoints — now includes geo IP lookup.
+api/routes.py  —  Day 6 update
+--------------------------------
+REST API — now includes alert endpoints and file export.
 """
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file, Response
 from api.geo import lookup, lookup_both, get_cache_size
+from capture.exporter import export_csv, export_pcap, generate_filename
+import io
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
-_capture = None
+_capture      = None
+_alert_engine = None
 
 
 def set_capture(capture_instance):
@@ -17,6 +20,12 @@ def set_capture(capture_instance):
     _capture = capture_instance
 
 
+def set_alert_engine(alert_engine_instance):
+    global _alert_engine
+    _alert_engine = alert_engine_instance
+
+
+# ── Status ──
 @api_bp.route("/status")
 def status():
     return jsonify({
@@ -27,6 +36,7 @@ def status():
     })
 
 
+# ── Stats ──
 @api_bp.route("/stats")
 def stats():
     if not _capture:
@@ -34,6 +44,7 @@ def stats():
     return jsonify(_capture.get_stats())
 
 
+# ── Packets ──
 @api_bp.route("/packets")
 def packets():
     if not _capture:
@@ -41,6 +52,7 @@ def packets():
     return jsonify(_capture.get_buffer())
 
 
+# ── Capture control ──
 @api_bp.route("/capture/start", methods=["POST"])
 def start_capture():
     if not _capture:
@@ -59,14 +71,72 @@ def stop_capture():
     return jsonify({"message": "Capture stopped"})
 
 
-# ── NEW: Geo IP endpoint ──
+# ── Geo IP ──
 @api_bp.route("/geo/<ip>")
 def geo_single(ip):
-    """Lookup geo info for a single IP."""
     return jsonify(lookup(ip))
 
 
 @api_bp.route("/geo/both/<src>/<dst>")
 def geo_both(src, dst):
-    """Lookup geo info for both src and dst IPs."""
     return jsonify(lookup_both(src, dst))
+
+
+# ── Alerts (Day 6) ──
+@api_bp.route("/alerts")
+def get_alerts():
+    if not _alert_engine:
+        return jsonify([])
+    limit = request.args.get("limit", 50, type=int)
+    return jsonify(_alert_engine.get_alerts(limit=limit))
+
+
+@api_bp.route("/alerts/counts")
+def alert_counts():
+    if not _alert_engine:
+        return jsonify({"info": 0, "warning": 0, "critical": 0})
+    return jsonify(_alert_engine.get_alert_counts())
+
+
+@api_bp.route("/alerts/clear", methods=["POST"])
+def clear_alerts():
+    if _alert_engine:
+        _alert_engine.clear_alerts()
+    return jsonify({"message": "Alerts cleared"})
+
+
+@api_bp.route("/alerts/thresholds", methods=["POST"])
+def update_thresholds():
+    if not _alert_engine:
+        return jsonify({"error": "Alert engine not initialized"}), 500
+    data = request.get_json()
+    if data:
+        _alert_engine.update_thresholds(data)
+    return jsonify({"message": "Thresholds updated", "thresholds": _alert_engine.thresholds})
+
+
+# ── Export (Day 6) ──
+@api_bp.route("/export/csv")
+def export_csv_route():
+    if not _capture:
+        return jsonify({"error": "Capture not initialized"}), 500
+    data     = export_csv(_capture.get_buffer())
+    filename = generate_filename("csv")
+    return Response(
+        data,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@api_bp.route("/export/pcap")
+def export_pcap_route():
+    if not _capture:
+        return jsonify({"error": "Capture not initialized"}), 500
+    data     = export_pcap(_capture.get_buffer())
+    filename = generate_filename("pcap")
+    return Response(
+        data,
+        mimetype="application/vnd.tcpdump.pcap",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )

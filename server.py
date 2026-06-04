@@ -1,31 +1,25 @@
 """
-server.py
----------
-PacketPulse Flask + WebSocket server.
-Upgraded to Day 4: Full Charts & Analytics Engine Integration.
-Run with:  python server.py
+server.py  —  Day 6 update
+---------------------------
+Wires PacketCapture → AlertEngine → SocketIO.
 """
 
-import sys
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_cors import CORS
 
-from capture.engine import PacketCapture, SCAPY_AVAILABLE
-from analytics import Analytics
-from api.routes import api_bp, set_capture
+from capture.engine import PacketCapture
+from api.routes import api_bp, set_capture, set_alert_engine
 from api.socket_events import init_socket, start_stats_broadcast
+from api.alerts import AlertEngine
 import config
 
 
 def create_app():
     app = Flask(__name__, static_folder="frontend", static_url_path="")
     CORS(app)
-
-    # Register REST blueprint
     app.register_blueprint(api_bp)
 
-    # Serve frontend index.html at root
     @app.route("/")
     def index():
         return app.send_static_file("index.html")
@@ -35,21 +29,16 @@ def create_app():
 
 def main():
     print("""
-  ____                     _        _    ____        _       
- |  _ \\ __ _  ___| | _____| |_|  _ \\ _   _| |___  ___ 
+  ____            _        _   ____        _
+ |  _ \\ __ _  ___| | _____| |_|  _ \\ _   _| |___  ___
  | |_) / _` |/ __| |/ / _ \\ __| |_) | | | | / __|/ _ \\
  |  __/ (_| | (__|   <  __/ |_|  __/| |_| | \\__ \\  __/
- |_|    \\__,_|\\___|_|\\_\\___|\\__|_|    \\__,_|_|___/\\___|
- 
-   Real-time Network Traffic Visualizer  |  Day 4 — Integrated Engine
+ |_|   \\__,_|\\___|_|\\_\\___|\\__|_|    \\__,_|_|___/\\___|
+
+  Real-time Network Traffic Visualizer  |  Day 6 — Alerts & Export
 """)
 
-    if not SCAPY_AVAILABLE:
-        print("[ERROR] Scapy not installed or admin rights missing. Run terminal as Administrator.")
-        sys.exit(1)
-
-    # Create Flask app and SocketIO
-    app = create_app()
+    app      = create_app()
     socketio = SocketIO(
         app,
         cors_allowed_origins="*",
@@ -58,48 +47,46 @@ def main():
         engineio_logger=False,
     )
 
-    # 1. Initialize the Analytics System
-    analytics = Analytics()
-
-    # Create packet capture engine
+    # Packet capture engine
     capture = PacketCapture(
         interface=config.CAPTURE_INTERFACE,
         buffer_size=config.BUFFER_SIZE,
     )
 
-    # 2. Wire up Live Data Pipelines via Callbacks
-    def handle_incoming_packet(parsed_pkt):
-        analytics.ingest(parsed_pkt)  # Feed the graph processor
-        socketio.emit("new_packet", parsed_pkt)  # Stream immediately to front-end table
+    # Alert engine
+    alert_engine = AlertEngine(max_alerts=100)
 
-    capture.on_packet(handle_incoming_packet)
+    # Feed every packet into the alert engine
+    capture.on_packet(alert_engine.process_packet)
 
-    # 3. Hijack get_stats to feed the frontend rich graph snapshots
-    capture.get_stats = analytics.snapshot
+    # Broadcast new alerts via WebSocket
+    def broadcast_alert(alert):
+        socketio.emit("new_alert", alert)
 
-    # Wire blueprints and socket endpoints together
+    alert_engine.on_alert(broadcast_alert)
+
+    # Wire everything together
     set_capture(capture)
+    set_alert_engine(alert_engine)
     init_socket(socketio, capture)
 
-    # Start capturing background threads
+    # Start capture and stats broadcast
     capture.start()
-
-    # Start periodic rich stats broadcasting loop
     start_stats_broadcast(interval=config.STATS_INTERVAL)
 
     print(f"  Interface : {config.CAPTURE_INTERFACE}")
     print(f"  Server    : http://localhost:{config.PORT}")
     print(f"  API       : http://localhost:{config.PORT}/api/status")
+    print(f"  Alerts    : http://localhost:{config.PORT}/api/alerts")
+    print(f"  Export    : http://localhost:{config.PORT}/api/export/csv")
     print(f"\n  Open http://localhost:{config.PORT} in your browser!")
     print(f"  Press Ctrl+C to stop.\n")
 
-    # Run server
     socketio.run(
         app,
         host=config.HOST,
         port=config.PORT,
         debug=config.DEBUG,
-        use_reloader=False,
     )
 
 

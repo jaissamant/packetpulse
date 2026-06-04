@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   PacketPulse — main.css  |  Day 4: Charts & Analytics
+   PacketPulse — main.css  |  Day 6: Alerts & Export
 ═══════════════════════════════════════════════════════════ */
 
 /* ── Tokens ─────────────────────────────────────────────── */
@@ -28,6 +28,11 @@
 
   --font-mono:    'JetBrains Mono', monospace;
   --font-display: 'Syne', sans-serif;
+
+  /* Heights for layout calculation */
+  --header-h:     49px;
+  --stats-h:      73px;
+  --export-h:     40px;
 }
 
 /* ── Reset ───────────────────────────────────────────────── */
@@ -65,6 +70,7 @@ body::before {
   align-items: center;
   justify-content: space-between;
   padding: 12px 24px;
+  height: var(--header-h);
   background: rgba(8,12,20,0.92);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(12px);
@@ -84,7 +90,7 @@ body::before {
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%       { opacity: 0.4; }
 }
 
 .brand-name {
@@ -136,6 +142,7 @@ body::before {
   background: var(--border);
   position: relative;
   z-index: 1;
+  height: var(--stats-h);
 }
 
 .stat-card {
@@ -174,11 +181,92 @@ body::before {
   margin-top: 2px;
 }
 
+/* ── Day 6: Export Bar ──────────────────────────────────── */
+.export-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  height: var(--export-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.export-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-right: 4px;
+}
+
+.export-btn {
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-hi);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.04em;
+}
+.export-btn:hover      { border-color: var(--accent); color: var(--accent); }
+.export-btn.pcap:hover { border-color: var(--purple); color: var(--purple); }
+
+.alert-toggle-btn {
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-hi);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.04em;
+}
+.alert-toggle-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+.alert-count-badge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 99px;
+  padding: 0 6px;
+  font-size: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+.alert-count-badge.warn { background: #1c1004; color: #fbbf24; border-color: #78350f; }
+.alert-count-badge.crit {
+  background: #1a0505; color: #f87171; border-color: #7f1d1d;
+  animation: alertpulse 1.5s ease infinite;
+}
+@keyframes alertpulse {
+  0%,100%{opacity:1;} 50%{opacity:0.5;}
+}
+
 /* ── Main 2-column Grid ─────────────────────────────────── */
 .main-grid {
   display: grid;
   grid-template-columns: 420px 1fr;
-  height: calc(100vh - 49px - 73px);
+  /* subtract header + stats + export bar */
+  height: calc(100vh - var(--header-h) - var(--stats-h) - var(--export-h));
   position: relative;
   z-index: 1;
 }
@@ -202,7 +290,6 @@ body::before {
 }
 
 .chart-card:hover { background: var(--surface-2); }
-
 .chart-card--wide { width: 100%; }
 
 .chart-card__header {
@@ -225,13 +312,9 @@ body::before {
   color: var(--text-dim);
 }
 
-.chart-wrap {
-  position: relative;
-  height: 140px;
-}
-
-.chart-wrap--tall  { height: 120px; }
-.chart-wrap--hosts { height: 180px; }
+.chart-wrap         { position: relative; height: 140px; }
+.chart-wrap--tall   { height: 120px; }
+.chart-wrap--hosts  { height: 180px; }
 
 /* Two charts side by side */
 .charts-row-2 {
@@ -240,15 +323,10 @@ body::before {
   border-bottom: 1px solid var(--border);
 }
 
-.charts-row-2 .chart-card {
-  border-bottom: none;
-}
+.charts-row-2 .chart-card            { border-bottom: none; }
+.charts-row-2 .chart-card:first-child { border-right: 1px solid var(--border); }
 
-.charts-row-2 .chart-card:first-child {
-  border-right: 1px solid var(--border);
-}
-
-/* Gauge overlay */
+/* Gauge */
 .chart-card--gauge { position: relative; }
 
 .gauge-wrap {
@@ -304,6 +382,7 @@ body::before {
   padding: 14px 20px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  flex-shrink: 0;
 }
 
 .table-controls {
@@ -325,14 +404,10 @@ body::before {
   outline: none;
   transition: border-color 0.2s;
 }
-
 .search-input:focus { border-color: var(--accent); }
 .search-input::placeholder { color: var(--text-dim); }
 
-.proto-filters {
-  display: flex;
-  gap: 4px;
-}
+.proto-filters { display: flex; gap: 4px; }
 
 .proto-btn {
   background: var(--surface-2);
@@ -346,12 +421,21 @@ body::before {
   transition: all 0.15s;
   letter-spacing: 0.05em;
 }
-
-.proto-btn:hover  { border-color: var(--border-hi); color: var(--text); }
+.proto-btn:hover { border-color: var(--border-hi); color: var(--text); }
 .proto-btn.active {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* ── Inspector hint (Day 5) ─────────────────────────────── */
+.inspector-hint {
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 6px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
 }
 
 /* ── Packet Table ────────────────────────────────────────── */
@@ -400,6 +484,7 @@ body::before {
 .packet-table tbody tr {
   transition: background 0.1s;
   animation: rowIn 0.2s ease-out;
+  cursor: pointer;
 }
 
 @keyframes rowIn {
@@ -419,18 +504,15 @@ body::before {
   letter-spacing: 0.06em;
 }
 
-.proto-badge.TCP  { background: rgba(0,245,196,0.12);  color: #00f5c4; }
-.proto-badge.UDP  { background: rgba(123,97,255,0.15); color: #7b61ff; }
-.proto-badge.ICMP { background: rgba(255,107,107,0.15);color: #ff6b6b; }
-.proto-badge.ARP  { background: rgba(255,217,61,0.12); color: #ffd93d; }
-.proto-badge.OTHER{ background: rgba(74,158,255,0.12); color: #4a9eff; }
+.proto-badge.TCP   { background: rgba(0,245,196,0.12);  color: #00f5c4; }
+.proto-badge.UDP   { background: rgba(123,97,255,0.15); color: #7b61ff; }
+.proto-badge.ICMP  { background: rgba(255,107,107,0.15);color: #ff6b6b; }
+.proto-badge.ARP   { background: rgba(255,217,61,0.12); color: #ffd93d; }
+.proto-badge.DNS   { background: rgba(74,158,255,0.12); color: #4a9eff; }
+.proto-badge.OTHER { background: rgba(74,158,255,0.12); color: #4a9eff; }
 
 .size-cell { color: var(--text-dim); text-align: right; }
-
-.svc-cell {
-  color: var(--purple);
-  font-size: 11px;
-}
+.svc-cell  { color: var(--purple); font-size: 11px; }
 
 /* ── Scrollbars ─────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 4px; height: 4px; }
@@ -439,7 +521,7 @@ body::before {
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .stats-row   { grid-template-columns: repeat(2, 1fr); }
-  .main-grid   { grid-template-columns: 1fr; height: auto; }
+  .stats-row     { grid-template-columns: repeat(2, 1fr); }
+  .main-grid     { grid-template-columns: 1fr; height: auto; }
   .charts-column { border-right: none; border-bottom: 1px solid var(--border); }
 }

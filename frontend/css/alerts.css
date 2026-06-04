@@ -1,0 +1,277 @@
+/* ============================================================
+   frontend/css/alerts.css  —  Day 6 Alert Panel & Export Bar
+   ============================================================ */
+
+/* ── Export Bar ── */
+.export-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #080b12;
+  border-bottom: 1px solid #1e2130;
+  flex-shrink: 0;
+}
+
+.export-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-family: 'JetBrains Mono', monospace;
+  margin-right: 4px;
+}
+
+.export-btn {
+  padding: 4px 13px;
+  border-radius: 6px;
+  border: 1px solid #2a2d3a;
+  background: #0f1117;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all .15s;
+  text-decoration: none;
+  display: inline-block;
+}
+.export-btn:hover { border-color: #3b82f6; color: #60a5fa; }
+.export-btn.pcap:hover { border-color: #8b5cf6; color: #a78bfa; }
+
+.alert-toggle-btn {
+  margin-left: auto;
+  padding: 4px 13px;
+  border-radius: 6px;
+  border: 1px solid #2a2d3a;
+  background: #0f1117;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.alert-toggle-btn:hover { border-color: #f59e0b; color: #fbbf24; }
+.alert-toggle-btn .alert-count-badge {
+  background: #7c2d12;
+  color: #fca5a5;
+  border-radius: 99px;
+  padding: 0px 6px;
+  font-size: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+.alert-toggle-btn .alert-count-badge.warn {
+  background: #78350f;
+  color: #fcd34d;
+}
+.alert-toggle-btn .alert-count-badge.crit {
+  background: #7f1d1d;
+  color: #fca5a5;
+  animation: alertpulse 1.5s ease infinite;
+}
+
+@keyframes alertpulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+/* ── Alert Panel ── */
+#alert-panel {
+  position: fixed;
+  bottom: 0; right: 0;
+  width: 420px;
+  max-height: 55vh;
+  background: #0f1117;
+  border: 1px solid #2a2d3a;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'JetBrains Mono', monospace;
+}
+#alert-panel.open { transform: translateY(0); }
+
+.alert-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #1e2130;
+  background: #080b12;
+  border-radius: 12px 12px 0 0;
+  flex-shrink: 0;
+}
+.alert-panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+.alert-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.alert-panel-close {
+  background: none;
+  border: 1px solid #2a2d3a;
+  border-radius: 5px;
+  color: #64748b;
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all .15s;
+}
+.alert-panel-close:hover { border-color: #ef4444; color: #ef4444; }
+
+.alert-clear-btn {
+  background: none;
+  border: 1px solid #2a2d3a;
+  border-radius: 5px;
+  color: #64748b;
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all .15s;
+}
+.alert-clear-btn:hover { border-color: #6b7280; color: #9ca3af; }
+
+/* Alert list */
+.alert-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.alert-list::-webkit-scrollbar { width: 4px; }
+.alert-list::-webkit-scrollbar-track { background: #080b12; }
+.alert-list::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+
+/* Individual alert */
+.alert-item {
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: alertIn 0.2s ease;
+}
+@keyframes alertIn {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+.alert-item.info {
+  background: #0c1929;
+  border: 1px solid #1e3a5f;
+}
+.alert-item.warning {
+  background: #1c1004;
+  border: 1px solid #78350f;
+}
+.alert-item.critical {
+  background: #1a0505;
+  border: 1px solid #7f1d1d;
+}
+
+.alert-item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.alert-sev-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.alert-sev-badge.info     { background:#1e3a5f; color:#60a5fa; }
+.alert-sev-badge.warning  { background:#78350f; color:#fbbf24; }
+.alert-sev-badge.critical { background:#7f1d1d; color:#f87171; }
+
+.alert-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #e2e8f0;
+  flex: 1;
+}
+.alert-time {
+  font-size: 9px;
+  color: #374151;
+}
+.alert-message {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Empty alert state */
+.alert-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  gap: 8px;
+  color: #374151;
+}
+.alert-empty-icon  { font-size: 28px; }
+.alert-empty-text  { font-size: 11px; color: #4b5563; }
+
+/* ── Toast notifications ── */
+.toast-container {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 500;
+  pointer-events: none;
+}
+
+.toast-notif {
+  background: #0f1117;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  max-width: 320px;
+  pointer-events: all;
+  animation: toastIn 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+@keyframes toastIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.toast-notif.info     { border: 1px solid #1e3a5f; }
+.toast-notif.warning  { border: 1px solid #78350f; }
+.toast-notif.critical { border: 1px solid #7f1d1d; }
+
+.toast-notif .t-title {
+  font-weight: 700;
+  font-size: 11px;
+}
+.toast-notif.info     .t-title { color: #60a5fa; }
+.toast-notif.warning  .t-title { color: #fbbf24; }
+.toast-notif.critical .t-title { color: #f87171; }
+
+.toast-notif .t-msg { color: #64748b; font-size: 10px; }

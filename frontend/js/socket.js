@@ -1,12 +1,10 @@
 /**
- * frontend/js/socket.js
- * Manages the Socket.IO connection and fires custom events
- * that the rest of the app listens to.
+ * frontend/js/socket.js  —  Day 6 update
+ * Adds new_alert event from server.
  */
 
 const socket = io();
 
-// ── Connection events ──
 socket.on('connect', () => {
   document.dispatchEvent(new CustomEvent('pp:connected'));
 });
@@ -15,7 +13,6 @@ socket.on('disconnect', () => {
   document.dispatchEvent(new CustomEvent('pp:disconnected'));
 });
 
-// ── Data events ──
 socket.on('packet_history', (packets) => {
   document.dispatchEvent(new CustomEvent('pp:history', { detail: packets }));
 });
@@ -28,5 +25,9 @@ socket.on('stats_update', (stats) => {
   document.dispatchEvent(new CustomEvent('pp:stats', { detail: stats }));
 });
 
-// ── Expose for other modules ──
+// Day 6: alert events
+socket.on('new_alert', (alert) => {
+  document.dispatchEvent(new CustomEvent('pp:alert', { detail: alert }));
+});
+
 window.ppSocket = socket;

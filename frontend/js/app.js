@@ -1,16 +1,36 @@
 /**
- * frontend/js/app.js
- * Main entry point — wires socket events → Table + Stats + Charts.
+ * frontend/js/app.js  —  Day 6
+ * Wires all socket events → Table, Stats, Charts, Alerts.
  */
 
-// ── Socket events → modules ──
-document.addEventListener('pp:connected',    () => Stats.setConnected(true));
-document.addEventListener('pp:disconnected', () => Stats.setConnected(false));
-document.addEventListener('pp:history',  e => Table.loadHistory(e.detail));
-document.addEventListener('pp:packet',   e => Table.addPacket(e.detail));
-document.addEventListener('pp:stats',    e => Stats.update(e.detail));
+// ── Socket → modules ──
+document.addEventListener('pp:connected', () => {
+  Stats.setConnected(true);
+});
 
-// ── Protocol filter buttons ──
+document.addEventListener('pp:disconnected', () => {
+  Stats.setConnected(false);
+});
+
+document.addEventListener('pp:history', e => {
+  Table.loadHistory(e.detail);
+});
+
+document.addEventListener('pp:packet', e => {
+  Table.addPacket(e.detail);
+  Charts.addPacket(e.detail);
+});
+
+document.addEventListener('pp:stats', e => {
+  Stats.update(e.detail);
+  Charts.updateStats(e.detail);
+});
+
+document.addEventListener('pp:alert', e => {
+  Alerts.receive(e.detail);
+});
+
+// ── Filter buttons ──
 document.querySelectorAll('.proto-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.proto-btn').forEach(b => b.classList.remove('active'));
@@ -27,7 +47,5 @@ if (searchInput) {
   });
 }
 
-// ── Init charts on load ──
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof initAllCharts === 'function') initAllCharts();
-});
+// ── Init charts ──
+Charts.init()

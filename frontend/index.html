@@ -10,19 +10,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <!-- Day 4 styles -->
   <link rel="stylesheet" href="/css/main.css" />
-  <!-- Day 5 inspector styles -->
   <link rel="stylesheet" href="/css/inspector.css" />
+  <link rel="stylesheet" href="/css/alerts.css" />
 </head>
 <body>
 
-  <!-- ── Header ── -->
+  <!-- Header -->
   <header class="site-header">
     <div class="header-brand">
       <span class="brand-icon">⬡</span>
       <span class="brand-name">PacketPulse</span>
-      <span class="brand-day">Day 5</span>
+      <span class="brand-day">Day 6</span>
     </div>
     <div class="header-status">
       <span class="status-dot" id="statusDot"></span>
@@ -30,7 +29,7 @@
     </div>
   </header>
 
-  <!-- ── Stat Cards ── -->
+  <!-- Stat Cards -->
   <section class="stats-row">
     <div class="stat-card">
       <div class="stat-label">Total Packets</div>
@@ -54,12 +53,21 @@
     </div>
   </section>
 
-  <!-- ── Main Grid ── -->
+  <!-- Export + Alert Bar -->
+  <div class="export-bar">
+    <span class="export-label">Export</span>
+    <a class="export-btn" href="/api/export/csv" download>⬇ CSV</a>
+    <a class="export-btn pcap" href="/api/export/pcap" download>⬇ PCAP</a>
+    <button class="alert-toggle-btn" id="alertToggleBtn">
+      🔔 Alerts
+      <span class="alert-count-badge" id="alertCountBadge">0</span>
+    </button>
+  </div>
+
+  <!-- Main Grid -->
   <main class="main-grid">
 
-    <!-- Charts column (Day 4 — unchanged) -->
     <div class="charts-column">
-
       <div class="chart-card chart-card--wide">
         <div class="chart-card__header">
           <span class="chart-card__title">Traffic Rate</span>
@@ -79,7 +87,6 @@
             <canvas id="protocolChart"></canvas>
           </div>
         </div>
-
         <div class="chart-card chart-card--gauge">
           <div class="chart-card__header">
             <span class="chart-card__title">Data Transferred</span>
@@ -103,10 +110,8 @@
           <canvas id="hostsChart"></canvas>
         </div>
       </div>
-
     </div>
 
-    <!-- Table column -->
     <div class="table-column">
       <div class="table-card">
         <div class="table-header">
@@ -122,12 +127,9 @@
             </div>
           </div>
         </div>
-
-        <!-- Day 5: click hint -->
         <div class="inspector-hint">
           👆 Click any row to inspect packet details &amp; geo location
         </div>
-
         <div class="table-scroll">
           <table class="packet-table">
             <thead>
@@ -148,7 +150,7 @@
 
   </main>
 
-  <!-- ── Day 5: Inspector Panel ── -->
+  <!-- Inspector Panel -->
   <div id="ins-overlay"></div>
   <div id="inspector">
     <div class="ins-header">
@@ -164,13 +166,34 @@
     </div>
   </div>
 
-  <!-- ── Scripts ── -->
-  <script src="/js/socket.js" defer></script>
-  <script src="/js/table.js" defer></script>
-  <script src="/js/stats.js" defer></script>
-  <script src="/js/charts.js" defer></script>
-  <script src="/js/app.js" defer></script>
-  <script src="/js/inspector.js" defer></script>
+  <!-- Alert Panel -->
+  <div id="alert-panel">
+    <div class="alert-panel-header">
+      <div class="alert-panel-title">🔔 Alerts</div>
+      <div class="alert-panel-actions">
+        <button class="alert-clear-btn" id="alertClearBtn">Clear all</button>
+        <button class="alert-panel-close" id="alertPanelClose">✕</button>
+      </div>
+    </div>
+    <div class="alert-list" id="alertListBody">
+      <div class="alert-empty">
+        <div class="alert-empty-icon">✅</div>
+        <div class="alert-empty-text">No alerts — network looks clean</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts — NO defer, order matters -->
+  <script src="/js/socket.js"></script>
+  <script src="/js/table.js"></script>
+  <script src="/js/stats.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/inspector.js"></script>
+  <script src="/js/alerts.js"></script>
+  <script src="/js/app.js"></script>
 
 </body>
 </html>

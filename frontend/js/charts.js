@@ -1,4 +1,4 @@
-// charts.js — Day 4: Live Chart.js analytics for PacketPulse
+// charts.js — Day 4/5/6: Live Chart.js analytics for PacketPulse
 
 const CHART_COLORS = {
   TCP:   '#00f5c4',
@@ -8,7 +8,7 @@ const CHART_COLORS = {
   OTHER: '#4a9eff',
 };
 
-const SPARKLINE_MAX = 30; // seconds of history shown
+const SPARKLINE_MAX = 30;
 
 // ─────────────────────────────────────────────
 // 1. Protocol Distribution — Donut
@@ -74,7 +74,7 @@ function updateProtocolChart(byProtocol) {
 // ─────────────────────────────────────────────
 // 2. Traffic Sparkline — packets/sec over time
 // ─────────────────────────────────────────────
-let sparklineChart = null;
+let sparklineChart  = null;
 const sparklineData = new Array(SPARKLINE_MAX).fill(0);
 const sparklineLabels = new Array(SPARKLINE_MAX).fill('');
 let lastPacketCount = 0;
@@ -193,12 +193,14 @@ function initHostsChart() {
   });
 }
 
-function updateHostsChart(topHosts) {
+function updateHostsChart(byProtocol) {
   if (!hostsChart) return;
-  const sorted = Object.entries(topHosts)
+  // Build top hosts from packet buffer tracked in window._hostCounts
+  const hostCounts = window._hostCounts || {};
+  const sorted = Object.entries(hostCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
-  hostsChart.data.labels = sorted.map(([ip]) => ip);
+  hostsChart.data.labels   = sorted.map(([ip]) => ip);
   hostsChart.data.datasets[0].data = sorted.map(([, count]) => count);
   hostsChart.update('none');
 }
@@ -207,7 +209,7 @@ function updateHostsChart(topHosts) {
 // 4. Bytes Gauge — doughnut as gauge
 // ─────────────────────────────────────────────
 let bytesGauge = null;
-let peakBytes = 1;
+let peakBytes  = 1;
 
 function initBytesGauge() {
   const ctx = document.getElementById('bytesGauge');
@@ -249,13 +251,13 @@ function updateBytesGauge(totalBytes) {
 // Helpers
 // ─────────────────────────────────────────────
 function formatBytes(b) {
-  if (b < 1024) return `${b} B`;
-  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  if (b < 1024)            return `${b} B`;
+  if (b < 1024 * 1024)    return `${(b / 1024).toFixed(1)} KB`;
   return `${(b / 1024 / 1024).toFixed(2)} MB`;
 }
 
 // ─────────────────────────────────────────────
-// Public API — called from app.js
+// Init all charts + sparkline ticker
 // ─────────────────────────────────────────────
 function initAllCharts() {
   initProtocolChart();
@@ -266,22 +268,38 @@ function initAllCharts() {
   // Tick sparkline every second
   setInterval(() => {
     const currentCount = window._totalPackets || 0;
-    const pps = currentCount - lastPacketCount;
+    const pps = Math.max(0, currentCount - lastPacketCount);
     lastPacketCount = currentCount;
     pushSparklinePoint(pps);
   }, 1000);
 }
 
-// ... leave all the top/middle chart code exactly as it is ...
-// Just find and replace the very last function at the bottom of charts.js:
+// ─────────────────────────────────────────────
+// Public Charts object — called from app.js
+// ─────────────────────────────────────────────
+const Charts = {
 
-function updateAllCharts(stats) {
-  if (!stats) return;
-  updateProtocolChart(stats.by_protocol || {});
-  
-  // FIXED HERE: Changed from top_hosts to top_src_ips
-  updateHostsChart(stats.top_src_ips || {}); 
-  
-  updateBytesGauge(stats.total_bytes || 0);
-  window._totalPackets = stats.total_packets || 0;
-}
+  // Called once on startup
+  init() {
+    initAllCharts();
+  },
+
+  // Called for every new packet (to track host counts)
+  addPacket(pkt) {
+    if (!pkt || !pkt.src_ip) return;
+    if (!window._hostCounts) window._hostCounts = {};
+    window._hostCounts[pkt.src_ip] = (window._hostCounts[pkt.src_ip] || 0) + 1;
+  },
+
+  // Called every 2s with stats from server
+  updateStats(stats) {
+    if (!stats) return;
+    window._totalPackets = stats.total_packets || 0;
+    updateProtocolChart(stats.by_protocol || {});
+    updateHostsChart(stats.by_protocol || {});
+    updateBytesGauge(stats.total_bytes || 0);
+  }
+};
+
+// Auto-init when DOM is ready
+document.addEventListener('DOMContentLoaded', () => Charts.init());
