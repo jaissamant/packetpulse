@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "generated": "2026-06-07T10:00:00Z",
+    "description": "PacketPulse demo capture — no root required",
+    "packets": 120,
+    "duration_seconds": 30
+  },
+  "packets": [
+    {"timestamp":"2026-06-07T10:00:00.001Z","src_ip":"192.168.1.5","dst_ip":"142.250.80.46","protocol":"TCP","src_port":52134,"dst_port":443,"service":"HTTPS","size":1420,"ttl":64,"flags":["ACK","PSH"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:00.212Z","src_ip":"192.168.1.5","dst_ip":"8.8.8.8","protocol":"UDP","src_port":53512,"dst_port":53,"service":"DNS","size":72,"ttl":64,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:00.310Z","src_ip":"142.250.80.46","dst_ip":"192.168.1.5","protocol":"TCP","src_port":443,"dst_port":52134,"service":"HTTPS","size":66,"ttl":118,"flags":["ACK"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:00.521Z","src_ip":"192.168.1.5","dst_ip":"151.101.1.140","protocol":"TCP","src_port":58021,"dst_port":443,"service":"HTTPS","size":890,"ttl":64,"flags":["SYN"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:00.712Z","src_ip":"8.8.8.8","dst_ip":"192.168.1.5","protocol":"UDP","src_port":53,"dst_port":53512,"service":"DNS","size":131,"ttl":119,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:01.001Z","src_ip":"192.168.1.5","dst_ip":"13.107.42.14","protocol":"TCP","src_port":61234,"dst_port":443,"service":"HTTPS","size":540,"ttl":64,"flags":["ACK"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:01.201Z","src_ip":"192.168.1.5","dst_ip":"17.57.144.60","protocol":"TCP","src_port":49832,"dst_port":443,"service":"HTTPS","size":320,"ttl":64,"flags":["ACK","PSH"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:01.401Z","src_ip":"192.168.1.1","dst_ip":"192.168.1.255","protocol":"ARP","src_port":null,"dst_port":null,"service":"ARP","size":42,"ttl":null,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:01.601Z","src_ip":"192.168.1.5","dst_ip":"8.8.8.8","protocol":"UDP","src_port":54100,"dst_port":53,"service":"DNS","size":68,"ttl":64,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:01.801Z","src_ip":"13.107.42.14","dst_ip":"192.168.1.5","protocol":"TCP","src_port":443,"dst_port":61234,"service":"HTTPS","size":1380,"ttl":115,"flags":["ACK","PSH"],"payload_preview":"17030300"},
+    {"timestamp":"2026-06-07T10:00:02.001Z","src_ip":"192.168.1.5","dst_ip":"172.217.14.238","protocol":"TCP","src_port":55210,"dst_port":80,"service":"HTTP","size":420,"ttl":64,"flags":["ACK","PSH"],"payload_preview":"474554202f"},
+    {"timestamp":"2026-06-07T10:00:02.201Z","src_ip":"172.217.14.238","dst_ip":"192.168.1.5","protocol":"TCP","src_port":80,"dst_port":55210,"service":"HTTP","size":2048,"ttl":55,"flags":["ACK","PSH"],"payload_preview":"485454502f"},
+    {"timestamp":"2026-06-07T10:00:02.401Z","src_ip":"192.168.1.5","dst_ip":"52.114.132.1","protocol":"TCP","src_port":62011,"dst_port":443,"service":"HTTPS","size":256,"ttl":64,"flags":["ACK"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:02.601Z","src_ip":"192.168.1.5","dst_ip":"8.8.8.8","protocol":"UDP","src_port":55999,"dst_port":53,"service":"DNS","size":75,"ttl":64,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:02.801Z","src_ip":"8.8.8.8","dst_ip":"192.168.1.5","protocol":"UDP","src_port":53,"dst_port":55999,"service":"DNS","size":142,"ttl":119,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:03.001Z","src_ip":"192.168.1.5","dst_ip":"104.21.45.12","protocol":"TCP","src_port":63022,"dst_port":443,"service":"HTTPS","size":780,"ttl":64,"flags":["SYN"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:03.201Z","src_ip":"104.21.45.12","dst_ip":"192.168.1.5","protocol":"TCP","src_port":443,"dst_port":63022,"service":"HTTPS","size":60,"ttl":58,"flags":["SYN","ACK"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:03.401Z","src_ip":"192.168.1.5","dst_ip":"104.21.45.12","protocol":"TCP","src_port":63022,"dst_port":443,"service":"HTTPS","size":52,"ttl":64,"flags":["ACK"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:03.601Z","src_ip":"192.168.1.5","dst_ip":"151.101.65.140","protocol":"TCP","src_port":58900,"dst_port":443,"service":"HTTPS","size":1200,"ttl":64,"flags":["ACK","PSH"],"payload_preview":"16030100"},
+    {"timestamp":"2026-06-07T10:00:03.801Z","src_ip":"151.101.65.140","dst_ip":"192.168.1.5","protocol":"TCP","src_port":443,"dst_port":58900,"service":"HTTPS","size":890,"ttl":60,"flags":["ACK","PSH"],"payload_preview":"17030300"},
+    {"timestamp":"2026-06-07T10:00:04.001Z","src_ip":"192.168.1.5","dst_ip":"8.8.8.8","protocol":"UDP","src_port":57123,"dst_port":53,"service":"DNS","size":69,"ttl":64,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:04.201Z","src_ip":"192.168.1.5","dst_ip":"93.184.216.34","protocol":"TCP","src_port":59100,"dst_port":80,"service":"HTTP","size":340,"ttl":64,"flags":["ACK","PSH"],"payload_preview":"474554202f"},
+    {"timestamp":"2026-06-07T10:00:04.401Z","src_ip":"93.184.216.34","dst_ip":"192.168.1.5","protocol":"TCP","src_port":80,"dst_port":59100,"service":"HTTP","size":1540,"ttl":52,"flags":["ACK","PSH"],"payload_preview":"485454502f"},
+    {"timestamp":"2026-06-07T10:00:04.601Z","src_ip":"192.168.1.5","dst_ip":"142.250.80.46","protocol":"TCP","src_port":52134,"dst_port":443,"service":"HTTPS","size":980,"ttl":64,"flags":["ACK","PSH"],"payload_preview":"17030302"},
+    {"timestamp":"2026-06-07T10:00:04.801Z","src_ip":"142.250.80.46","dst_ip":"192.168.1.5","protocol":"TCP","src_port":443,"dst_port":52134,"service":"HTTPS","size":1420,"ttl":118,"flags":["ACK","PSH"],"payload_preview":"17030300"},
+    {"timestamp":"2026-06-07T10:00:05.001Z","src_ip":"192.168.1.5","dst_ip":"8.8.4.4","protocol":"UDP","src_port":58200,"dst_port":53,"service":"DNS","size":73,"ttl":64,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:05.201Z","src_ip":"8.8.4.4","dst_ip":"192.168.1.5","protocol":"UDP","src_port":53,"dst_port":58200,"service":"DNS","size":128,"ttl":119,"flags":[],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:05.401Z","src_ip":"192.168.1.5","dst_ip":"20.189.173.1","protocol":"TCP","src_port":64100,"dst_port":443,"service":"HTTPS","size":460,"ttl":64,"flags":["ACK"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:05.601Z","src_ip":"192.168.1.5","dst_ip":"17.253.144.10","protocol":"TCP","src_port":49999,"dst_port":443,"service":"HTTPS","size":220,"ttl":64,"flags":["ACK","PSH"],"payload_preview":""},
+    {"timestamp":"2026-06-07T10:00:05.801Z","src_ip":"17.253.144.10","dst_ip":"192.168.1.5","protocol":"TCP","src_port":443,"dst_port":49999,"service":"HTTPS","size":1380,"ttl":52,"flags":["ACK","PSH"],"payload_preview":"17030300"}
+  ],
+  "stats": {
+    "total_packets": 30,
+    "total_bytes": 25890,
+    "packets_per_sec": 6.0,
+    "by_protocol": { "TCP": 22, "UDP": 6, "ARP": 1, "ICMP": 1 },
+    "start_time": "2026-06-07T10:00:00Z"
+  }
+}

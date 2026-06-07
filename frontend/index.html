@@ -13,23 +13,72 @@
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/inspector.css" />
   <link rel="stylesheet" href="/css/alerts.css" />
+
+  <style>
+    /* ── Demo banner ── */
+    .demo-banner {
+      display: none;
+      background: linear-gradient(90deg, #1c1004, #0d1117);
+      border-bottom: 1px solid #78350f;
+      padding: 6px 24px;
+      font-size: 11px;
+      color: #fbbf24;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+      letter-spacing: 0.03em;
+    }
+    .demo-banner.show { display: block; }
+    .demo-banner a {
+      color: #fcd34d;
+      text-decoration: underline;
+      margin-left: 8px;
+    }
+
+    /* ── GitHub link in header ── */
+    .github-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-hi);
+      background: var(--surface-2);
+      color: var(--text-dim);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .github-link:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- ── Demo Banner (shown in demo mode) ── -->
+  <div class="demo-banner" id="demoBanner">
+    🎮 Demo Mode — replaying mock capture data &nbsp;·&nbsp;
+    <a href="https://github.com/jaissamant/packetpulse" target="_blank">View on GitHub ↗</a>
+  </div>
+
+  <!-- ── Header ── -->
   <header class="site-header">
     <div class="header-brand">
       <span class="brand-icon">⬡</span>
       <span class="brand-name">PacketPulse</span>
-      <span class="brand-day">Day 6</span>
+      <span class="brand-icon">⬡</span>
     </div>
     <div class="header-status">
+      <a class="github-link"
+         href="https://github.com/jaissamant/packetpulse"
+         target="_blank">
+        ⭐ GitHub
+      </a>
       <span class="status-dot" id="statusDot"></span>
       <span class="status-text" id="statusText">Connecting…</span>
     </div>
   </header>
 
-  <!-- Stat Cards -->
+  <!-- ── Stat Cards ── -->
   <section class="stats-row">
     <div class="stat-card">
       <div class="stat-label">Total Packets</div>
@@ -53,10 +102,10 @@
     </div>
   </section>
 
-  <!-- Export + Alert Bar -->
+  <!-- ── Export + Alert Bar ── -->
   <div class="export-bar">
     <span class="export-label">Export</span>
-    <a class="export-btn" href="/api/export/csv" download>⬇ CSV</a>
+    <a class="export-btn"      href="/api/export/csv"  download>⬇ CSV</a>
     <a class="export-btn pcap" href="/api/export/pcap" download>⬇ PCAP</a>
     <button class="alert-toggle-btn" id="alertToggleBtn">
       🔔 Alerts
@@ -64,10 +113,12 @@
     </button>
   </div>
 
-  <!-- Main Grid -->
+  <!-- ── Main Grid ── -->
   <main class="main-grid">
 
+    <!-- Charts column -->
     <div class="charts-column">
+
       <div class="chart-card chart-card--wide">
         <div class="chart-card__header">
           <span class="chart-card__title">Traffic Rate</span>
@@ -110,8 +161,10 @@
           <canvas id="hostsChart"></canvas>
         </div>
       </div>
+
     </div>
 
+    <!-- Table column -->
     <div class="table-column">
       <div class="table-card">
         <div class="table-header">
@@ -127,9 +180,11 @@
             </div>
           </div>
         </div>
+
         <div class="inspector-hint">
           👆 Click any row to inspect packet details &amp; geo location
         </div>
+
         <div class="table-scroll">
           <table class="packet-table">
             <thead>
@@ -150,7 +205,7 @@
 
   </main>
 
-  <!-- Inspector Panel -->
+  <!-- ── Inspector Panel ── -->
   <div id="ins-overlay"></div>
   <div id="inspector">
     <div class="ins-header">
@@ -166,7 +221,7 @@
     </div>
   </div>
 
-  <!-- Alert Panel -->
+  <!-- ── Alert Panel ── -->
   <div id="alert-panel">
     <div class="alert-panel-header">
       <div class="alert-panel-title">🔔 Alerts</div>
@@ -183,17 +238,25 @@
     </div>
   </div>
 
-  <!-- Toast container -->
+  <!-- ── Toast container ── -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- Scripts — NO defer, order matters -->
-  <script src="/js/socket.js"></script>
-  <script src="/js/table.js"></script>
-  <script src="/js/stats.js"></script>
-  <script src="/js/charts.js"></script>
-  <script src="/js/inspector.js"></script>
-  <script src="/js/alerts.js"></script>
-  <script src="/js/app.js"></script>
+  <!-- ── Scripts ── -->
+  <script src="/js/socket.js" defer></script>
+  <script src="/js/table.js" defer></script>
+  <script src="/js/stats.js" defer></script>
+  <script src="/js/charts.js" defer></script>
+  <script src="/js/app.js" defer></script>
+  <script src="/js/inspector.js" defer></script>
+  <script src="/js/alerts.js" defer></script>
+
+  <!-- Day 7: detect demo mode -->
+  <script>
+    // Show demo banner if running on port 5001
+    if (location.port === '5001') {
+      document.getElementById('demoBanner').classList.add('show');
+    }
+  </script>
 
 </body>
 </html>
