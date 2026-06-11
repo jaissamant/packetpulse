@@ -12,18 +12,6 @@ PacketPulse captures live packets flowing through your network and displays them
 
 ---
 
-## 🚀 Progress log
-
-- [x] Day 1 — Packet capture engine (Scapy core, protocol parsing, CLI output)
-- [x] Day 2 — Flask server + WebSocket live streaming
-- [x] Day 3 — Real-time dashboard UI (live packet feed table)
-- [x] Day 4 — Traffic analytics & live charts
-- [x] Day 5 — Packet inspector & geo IP lookup
-- [x] Day 6 — Alert system & pcap/csv export
-- [x] Day 7 — Demo mode, polish & full documentation
-
----
-
 ## ✨ Features
 
 | Feature | Status |
@@ -135,12 +123,6 @@ Raw packet capture requires elevated privileges:
 - **Demo mode** — no privileges needed, runs on mock data
 
 See [docs/SETUP.md](docs/SETUP.md) for full setup instructions.
-
----
-
-## 🤝 Built in public
-
-This project was built in 7 days, one commit per day, as a learning exercise in network programming, real-time web apps, and Python backend development.
 
 ---
 
